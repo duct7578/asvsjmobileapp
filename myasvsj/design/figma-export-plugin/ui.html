@@ -1,0 +1,45 @@
+<style>
+  body { font: 13px/1.45 system-ui, sans-serif; margin: 12px; color: #1f2430; }
+  #s { font-weight: 600; margin-bottom: 6px; }
+  #log { white-space: pre-wrap; font-size: 11px; color: #555; max-height: 140px; overflow: auto; margin: 0; }
+  .err { color: #b3261e; }
+</style>
+<div id="s">Đang chuẩn bị…</div>
+<pre id="log"></pre>
+<script>
+  const SERVER = 'http://localhost:8765';
+  const s = document.getElementById('s');
+  const log = document.getElementById('log');
+  const reply = (msg) => parent.postMessage({ pluginMessage: msg }, '*');
+
+  async function ping() {
+    try {
+      const r = await fetch(SERVER + '/ping');
+      return r.ok;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  onmessage = async (e) => {
+    const m = e.data && e.data.pluginMessage;
+    if (!m) return;
+    if (m.type === 'ping') {
+      reply({ type: 'pong', ok: await ping() });
+    } else if (m.type === 'file') {
+      try {
+        const body = m.text != null ? new TextEncoder().encode(m.text) : m.bytes;
+        const r = await fetch(SERVER + '/save?path=' + encodeURIComponent(m.path), { method: 'POST', body });
+        reply({ type: 'ack', id: m.id, ok: r.ok, err: r.ok ? null : 'HTTP ' + r.status });
+      } catch (err) {
+        reply({ type: 'ack', id: m.id, ok: false, err: String(err) });
+      }
+    } else if (m.type === 'status') {
+      s.textContent = m.text;
+      if (m.error) s.className = 'err';
+    } else if (m.type === 'log') {
+      log.textContent += m.text + '\n';
+      log.scrollTop = log.scrollHeight;
+    }
+  };
+</script>

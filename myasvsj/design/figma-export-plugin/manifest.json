@@ -1,0 +1,14 @@
+{
+  "name": "Senpai ơi – Xuất thiết kế cho Claude",
+  "id": "senpai-oi-export-local",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "devAllowedDomains": ["http://localhost:8765"],
+    "reasoning": "Gửi ảnh và cấu trúc màn hình về máy chủ nhận file chạy trên chính máy này."
+  }
+}
